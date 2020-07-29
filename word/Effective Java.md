@@ -84,7 +84,7 @@
 
 ##### Item 1: Consider static factory methods instead of constructors 
 
-(考虑用静态工厂方法代替构造器)
+**(考虑用静态工厂方法代替构造器)**
 
 ​	The traditional way for a class to allow a client to obtain an instance is to provide a public constructors .There  is another technique that should be a part of every programmer's toolkit. A class can provide a  public static factory method, which is simply an static method that returns an instance of the class . Here's a  simple example from Boolean (the boxed primitive class for boolean). This method translates a boolean primitive value into a Boolean object reference :
 
@@ -94,7 +94,7 @@
 
 ​	 public static Boolean valueOf(boolean b) { 
 
-​			return b ? Boolean.TRUE : Boolean.FALSE; 
+​			return b ? Boolean. TRUE : Boolean .FALSE; 
 
 ​	} 
 
@@ -122,9 +122,9 @@
 
 ​	**静态工厂方法与构造器不同的第二优势在于，不必在每次调用都创建一个新对象。**这使得不可变类使用预先构建的实例，或者使用将构建好的实例缓存起来，进行重复的使用，应该避免没必要创建重复对象。这个Boolean中valueOf方法说明这个技术：它重来不创建对象。这个技术有点类似设计模式中的享元模式，如果每次请求的对象都是相同对象，并且创建对象有特别大的代价，那么这项技术可以有非常大的性能提升。
 
-​	The ability of static factory methods to return the same object form repeated invocations allows classes to maintain strict control over what instances exist at any time . Classes that do this are said to be instance-controlled . There are several reasons to written instance-controlled classes . Instance control allows a class to guarantee that it is a singleton or noninstantiable . Also , it allows an immutable value classes to make the guarantee that no two equal instances exist : a.equals (b) if and only if a == b . This is the basis of the Flyweight pattern . Enum types provide this guarantee .
+​	The ability of static factory methods to return the same object form repeated invocations allows classes to maintain strict control over what instances exist at any time . Classes that do this are said to be instance-controlled . There are several reasons to written instance-controlled classes . Instance control allows a class to guarantee that it is a singleton or noninstantiable . Also , it allows an immutable value classes to make the guarantee that no two equal instances exist : a. equals (b) if and only if a == b . This is the basis of the Flyweight pattern . Enum types provide this guarantee .
 
-​	静态工厂方法能够为重复调用请求返回相同的对象，这样有助于在任何时间运行严格控制实例的存在。这种类我们称作为实例受控的类。编写实例控制的类有几个原因。实例受控使得可以确保一个类是单例或者不可实例化，它使得不可变值的类，可以确保不会存在两个相同实例存在：只有a==b时，a.equal(b)才是true . 这个是基于享元模式的基础。枚举类也能够保证。
+​	静态工厂方法能够为重复调用请求返回相同的对象，这样有助于在任何时间运行严格控制实例的存在。这种类我们称作为实例受控的类。编写实例控制的类有几个原因。实例受控使得可以确保一个类是单例或者不可实例化，它使得不可变值的类，可以确保不会存在两个相同实例存在：只有a==b时，a. equal(b)才是true . 这个是基于享元模式的基础。枚举类也能够保证。
 
 ​	**A third advantage of static factory methods is that , unlike constructors , they are can return an object of any subtype of their return type.** This gives you greatly flexibility in choosing the class of the returned objects.
 
@@ -154,3 +154,10 @@
 
 ​	EnumSet （详见第 36 条）没有公有的构造器，只有静态工厂方法 OpenJDK 实现中，它们返回两种子类之一的 个实例，具体则取决于底层枚举类型的大小：如果它的元素有 64 个或者更少，就像大多数枚举类型一样，静态工厂方法就会返回一个 RegalarEumSet 实例，用单个 long 进行支持；如果枚举类型有 65 个或者更多元素，工厂就返回 JumboEnumSet实例，用一个 long 数组进行支持;
 
+​	The existence of these two implementation classes is invisible to clients . If  RegularEnumSet ceased to offer performance  advantage for small enum types, it could be eliminated from a  future release with no ill effects . Similarly , a future release could add a third or fourth implementation of EnumSet if it prove beneficial for performance. Clients neither know nor care about  the class of the object they get back from the factory . they care only that is some subclass of  EnumSet.
+
+​	客户端看不见这个类有两个实现的存在，如果RegularEnumSet 不能给更小枚举类提供性能优势，就可能在未来的版本上删除，不会有任何影响。同样地，如果能证明对性能有益，在未来版本中能添加第三甚至第四Enumset实现。客户端不知道也不关心他们在工厂对象中返回的类，他们只需要关注EnumSet的子类。
+
+​	**A fifth advantage of static factories is that the class of the returned object need not exist when the class containing the method is written.** Such flexible static factory method s form the basic of service provider framework , like the Java Database Connectivity (JDBC) .A server provider framework is a system in which providers implement a service , and the system makes the implementations available to clients , decoupling the clients form the implementations .
+
+​	**静态工厂第五优势在于，方法返回类所属对象，在编写包含该静态方法类时可以不存在。**这种灵活的静态工厂方法是形成服务提供框架基础，例如 Java JDBC设计，一个服务提供框架指的是系统，一个服务多个提供者，系统为客户端提供多个实现提供者，客户端也与实现提供者进行解耦。

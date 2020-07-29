@@ -1,10 +1,10 @@
 ## Java-Annotation
 
 ```java
-# 项目工程地址：https://github.com/changzhaoyou/self-advance 
+# github url：https://github.com/changzhaoyou/self-advance 
 ```
 
-### 一、 注解
+### 1. Annotation
 
 - **概念与定义**
 
@@ -88,7 +88,223 @@
   	# 通过反射获取类中，是否包含注解类，包含注解进行解析处理。
   ```
 
-- **注解小结**
+- **Annotation Summary**
 
-- **示例代码**
+  
+
+- **Example code**
+
+  ```java
+  package com.ycz.annotation.domain;
+  import com.ycz.annotation.Length;
+  import com.ycz.annotation.NotBlank;
+  /**
+   * entity
+   *
+   * @author ycz
+   */
+  public class Student {
+      /**
+       * name
+       */
+      @NotBlank(message = "name is not empty")
+      private String name;
+      /**
+       * age
+       */
+      @Length(min = 8, max = 30, message = "student age must be int the range 8-30")
+      private int age;
+  
+      public Student(String name, int age) {
+          this.name = name;
+          this.age = age;
+      }
+  
+      public String getName() {
+          return name;
+      }
+  
+      public void setName(String name) {
+          this.name = name;
+      }
+  
+      public int getAge() {
+          return age;
+      }
+  
+      public void setAge(int age) {
+          this.age = age;
+      }
+  
+      @Override
+      public String toString() {
+          return "Student{" +
+                  "name='" + name + '\'' +
+                  ", age=" + age +
+                  '}';
+      }
+  }
+  
+  
+  package com.ycz.annotation;
+  import java.lang.annotation.*;
+  /**
+   * @author ycz
+   * @date 2020-07-05
+   * @Desc judge range 
+   */
+  @Target(ElementType.FIELD)
+  @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
+  public @interface Length {
+      /**
+       * Max value
+       *
+       * @return
+       */
+      int max() default Integer.MAX_VALUE;
+  
+      /**
+       * Min value
+       *
+       * @return
+       */
+      int min() default 0;
+  
+      /**
+       * prompt message
+       *
+       * @return
+       */
+      String message() default "";
+  }
+  
+  
+  /**
+   * @author ycz
+   * @date 2020-07-05
+   * @Desc Non-null check
+   */
+  @Target(ElementType.FIELD)
+  @Retention(RetentionPolicy.RUNTIME)
+  @Inherited
+  public @interface NotBlank {
+      /**
+       * prompt msg
+       *
+       * @return
+       */
+      String message() default "";
+  }
+  
+  
+  /**
+   * @author ycz
+   * @date 2020-07-07
+   * @Desc
+   */
+  @Target({})
+  @Retention(RetentionPolicy.RUNTIME)
+  @Documented
+  public @interface Param {
+      /**
+       * default string array
+       *
+       * @return
+       */
+      String[] strs() default {};
+  }
+  
+  
+  
+  package com.ycz.annotation;
+  import java.lang.annotation.*;
+  /**
+   * @author ycz
+   * @date 2020-07-05
+   * @Desc Whether to enable the check mark
+   */
+  @Target({ElementType.METHOD, ElementType.PARAMETER})
+  @Documented
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface Valid {
+      /**
+       * default enable
+       *
+       * @return
+       */
+      boolean value() default true;
+  
+      /**
+       * Nested annotation
+       *
+       * @return
+       */
+      Param[] getStr() default {};
+  }
+  
+  
+  
+  package com.ycz.annotation;
+  import com.ycz.annotation.domain.Student;
+  import java.lang.reflect.Field;
+  import java.lang.reflect.Method;
+  import java.lang.reflect.Parameter;
+  /**
+   * Test annotation
+   *
+   * @author ycz
+   */
+  public class AnnotationTest {
+  
+      /**
+       * show method 
+       *
+       * @param student
+       */
+      public void show(@Valid Student student) {
+          System.out.println("invoke show");
+          System.out.println(student);
+      }
+  
+      public static void main(String[] args) throws Exception {
+          Student student = new Student("Scott", 8);
+          AnnotationTest annotationTest = new AnnotationTest();
+          Class clazz = annotationTest.getClass();
+          Method[] declaredMethods = clazz.getDeclaredMethods();
+          for (Method method : declaredMethods) {
+              System.out.println("method："+method.getName());
+              Parameter[] parameters = method.getParameters();
+              for (Parameter parameter : parameters) {
+                  Valid annotation = parameter.getAnnotation(Valid.class);
+                  if (annotation != null && annotation.value()) {
+                      Class<Student> studentClass = Student.class;
+                      Field[] declaredFields = studentClass.getDeclaredFields();
+                      for (Field field : declaredFields) {
+                          field.setAccessible(true);
+                          NotBlank notBlankAnnotation = field.getAnnotation(NotBlank.class);
+                          Length lengthAnnotation = field.getAnnotation(Length.class);
+                          if (field.isAnnotationPresent(NotBlank.class)) {
+                              String str = (String) field.get(student);
+                              if ("".equals(str) || null == str) {
+                                  throw new Exception(notBlankAnnotation.message());
+                              }
+                          }
+                          if (field.isAnnotationPresent(Length.class)) {
+                              int length = (int) field.get(student);
+                              if (length < 8 || length > 30) {
+                                  throw new Exception(lengthAnnotation.message());
+                              }
+                          }
+                      }
+                      method.invoke(annotationTest, student);
+                  }
+              }
+          }
+      }
+  }
+  
+  ```
+
+  
 
